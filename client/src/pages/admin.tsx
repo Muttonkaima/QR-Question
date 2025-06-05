@@ -258,6 +258,9 @@ export default function AdminPanel() {
                               <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
                               <SelectItem value="true_false">True/False</SelectItem>
                               <SelectItem value="fill_blank">Fill in the Blank</SelectItem>
+                              <SelectItem value="reorder">Reordering (Drag & Drop)</SelectItem>
+                              <SelectItem value="sort">Sorting</SelectItem>
+                              <SelectItem value="match">Match the Following</SelectItem>
                             </SelectContent>
                           </Select>
                           <FormMessage />

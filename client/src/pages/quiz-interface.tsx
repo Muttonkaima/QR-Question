@@ -238,6 +238,84 @@ export default function QuizInterface() {
                     </div>
                   </label>
                 ))
+              ) : currentQuestion.questionType === 'reorder' && currentQuestion.options ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-400 mb-4">Drag and drop to reorder the items:</div>
+                  {currentQuestion.options.map((option: string, index: number) => (
+                    <div key={index} className="gaming-card rounded-lg p-4 cursor-move hover:shadow-[0_0_20px_rgba(0,212,255,0.2)]">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-cyan-400 text-xl">⋮⋮</span>
+                        <span className="text-lg">{option}</span>
+                      </div>
+                    </div>
+                  ))}
+                  <input
+                    type="hidden"
+                    value={answers[currentQuestion.id] || ''}
+                    onChange={(e) => handleAnswerSelect(e.target.value)}
+                  />
+                </div>
+              ) : currentQuestion.questionType === 'sort' && currentQuestion.options ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-400 mb-4">Sort the items in the correct order:</div>
+                  {currentQuestion.options.map((option: string, index: number) => (
+                    <label key={index} className="block cursor-pointer">
+                      <div className={`gaming-card rounded-lg p-4 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,212,255,0.2)] group ${
+                        answers[currentQuestion.id] === option ? 'border-cyan-400 shadow-[0_0_20px_rgba(0,212,255,0.3)]' : ''
+                      }`}>
+                        <div className="flex items-center space-x-4">
+                          <input 
+                            type="radio" 
+                            name={`question-${currentQuestion.id}`}
+                            value={option}
+                            checked={answers[currentQuestion.id] === option}
+                            onChange={(e) => handleAnswerSelect(e.target.value)}
+                            className="w-5 h-5 text-cyan-400"
+                          />
+                          <div className="flex-1">
+                            <span className="text-lg">{option}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              ) : currentQuestion.questionType === 'match' && currentQuestion.options ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-400 mb-4">Match the items from left to right:</div>
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <h4 className="text-cyan-400 font-bold">Items</h4>
+                      {currentQuestion.options.slice(0, Math.ceil(currentQuestion.options.length / 2)).map((option: string, index: number) => (
+                        <div key={index} className="gaming-card rounded-lg p-3">
+                          <span className="text-lg">{option}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="text-green-400 font-bold">Matches</h4>
+                      {currentQuestion.options.slice(Math.ceil(currentQuestion.options.length / 2)).map((option: string, index: number) => (
+                        <label key={index} className="block cursor-pointer">
+                          <div className={`gaming-card rounded-lg p-3 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,212,255,0.2)] ${
+                            answers[currentQuestion.id] === option ? 'border-cyan-400 shadow-[0_0_20px_rgba(0,212,255,0.3)]' : ''
+                          }`}>
+                            <div className="flex items-center space-x-3">
+                              <input 
+                                type="radio" 
+                                name={`question-${currentQuestion.id}`}
+                                value={option}
+                                checked={answers[currentQuestion.id] === option}
+                                onChange={(e) => handleAnswerSelect(e.target.value)}
+                                className="w-4 h-4 text-cyan-400"
+                              />
+                              <span className="text-lg">{option}</span>
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               ) : (
                 <div className="space-y-4">
                   <input

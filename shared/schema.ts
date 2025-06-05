@@ -15,7 +15,7 @@ export const questions = pgTable("questions", {
   id: serial("id").primaryKey(),
   quizId: integer("quiz_id").notNull().references(() => quizzes.id),
   questionText: text("question_text").notNull(),
-  questionType: text("question_type").notNull(), // "multiple_choice", "true_false", "fill_blank"
+  questionType: text("question_type").notNull(), // "multiple_choice", "true_false", "fill_blank", "reorder", "sort", "match"
   options: text("options").array(), // JSON array for MCQ options
   correctAnswer: text("correct_answer").notNull(),
   points: integer("points").default(10),
