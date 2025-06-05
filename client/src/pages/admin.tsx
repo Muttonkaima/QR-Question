@@ -153,16 +153,20 @@ export default function AdminPanel() {
               </span>
             </div>
             <div className="hidden md:flex items-center space-x-6">
-              <Button variant="ghost" className="text-gray-300 hover:text-cyan-400">
-                <Settings className="mr-2 h-4 w-4" />
-                Admin Panel
-              </Button>
-              <Link href="/quiz/demo/leaderboard">
-                <Button variant="ghost" className="text-gray-300 hover:text-green-400">
-                  <Trophy className="mr-2 h-4 w-4" />
-                  Leaderboards
+              <Link href="/admin-dashboard">
+                <Button variant="ghost" className="text-gray-300 hover:text-cyan-400">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Admin Panel
                 </Button>
               </Link>
+              {currentQuiz?.id && (
+                <Link href={`/quiz/${currentQuiz.id}/leaderboard`}>
+                  <Button variant="ghost" className="text-gray-300 hover:text-green-400">
+                    <Trophy className="mr-2 h-4 w-4" />
+                    Leaderboards
+                  </Button>
+                </Link>
+              )}
             </div>
           </div>
         </div>

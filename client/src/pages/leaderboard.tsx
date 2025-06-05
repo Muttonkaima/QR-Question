@@ -6,52 +6,88 @@ import { queryClient } from "@/lib/queryClient";
 import { Trophy, Download, ArrowLeft, Circle, Crown, Medal, Award } from "lucide-react";
 import GamingCard from "@/components/ui/gaming-card";
 
+interface Quiz {
+  id: string;
+  title: string;
+  timeLimit: number;
+  isActive: boolean;
+  qrCode?: string;
+}
+
+interface LeaderboardEntry {
+  id: string;
+  name: string;
+  email: string;
+  score: number;
+  timeSpent: number;
+}
+
 export default function Leaderboard() {
-  const { qrCode } = useParams();
+  const { qrCode, quizId } = useParams();
   const [lastUpdate, setLastUpdate] = useState(new Date());
 
-  const { data: quiz } = useQuery({
-    queryKey: [`/api/quizzes/qr/${qrCode}`],
-    enabled: !!qrCode,
+  // First try to get quiz by QR code, if not available try by quizId
+  const { data: quiz, isLoading: quizLoading } = useQuery<Quiz>({
+    queryKey: qrCode ? [`/api/quizzes/qr/${qrCode}`] : [`/api/quizzes/${quizId}`],
+    enabled: !!qrCode || !!quizId,
   });
 
-  const { data: leaderboard, isLoading: leaderboardLoading } = useQuery({
-    queryKey: [`/api/quizzes/${quiz?.id}/leaderboard`],
-    enabled: !!quiz?.id,
+  // If no quiz data and we have a QR code, try to get quiz by ID from the URL
+  const { data: quizFromId } = useQuery<Quiz>({
+    queryKey: [`/api/quizzes/${qrCode}`],
+    enabled: !quiz && !!qrCode && !quizLoading,
+  });
+
+  // Use the first available quiz data
+  const currentQuiz = (quiz || quizFromId) as Quiz | undefined;
+
+  const { data: leaderboard = [], isLoading: leaderboardLoading } = useQuery<LeaderboardEntry[]>({
+    queryKey: currentQuiz ? [`/api/quizzes/${currentQuiz.id}/leaderboard`] : [],
+    enabled: !!currentQuiz?.id,
     refetchInterval: 5000, // Real-time updates every 5 seconds
   });
 
-  const { data: stats } = useQuery({
-    queryKey: [`/api/quizzes/${quiz?.id}/stats`],
-    enabled: !!quiz?.id,
+  interface QuizStats {
+    totalParticipants: number;
+    averageScore: number;
+    highestScore: number;
+  }
+
+  const { data: stats } = useQuery<QuizStats>({
+    queryKey: currentQuiz ? [`/api/quizzes/${currentQuiz.id}/stats`] : [],
+    enabled: !!currentQuiz?.id,
     refetchInterval: 5000,
   });
 
   // Update last update time
   useEffect(() => {
-    if (leaderboard) {
+    if (leaderboard && leaderboard.length > 0) {
       setLastUpdate(new Date());
     }
   }, [leaderboard]);
 
   const handleExport = async () => {
-    if (!quiz?.id) return;
+    if (!currentQuiz?.id) return;
     
     try {
-      const response = await fetch(`/api/quizzes/${quiz.id}/export`);
+      const response = await fetch(`/api/quizzes/${currentQuiz.id}/export`);
+      if (!response.ok) throw new Error('Export failed');
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `quiz-${quiz.id}-results.csv`;
+      a.download = `quiz-${currentQuiz.id}-results.csv`;
+      document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
     } catch (error) {
       console.error('Export failed:', error);
     }
   };
 
-  const formatTime = (seconds: number) => {
+  const formatTime = (seconds: number | undefined) => {
+    if (seconds === undefined) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -66,7 +102,7 @@ export default function Leaderboard() {
     return `${hours} hour${hours > 1 ? 's' : ''} ago`;
   };
 
-  if (leaderboardLoading || !leaderboard) {
+  if (leaderboardLoading || quizLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-white text-xl">Loading leaderboard...</div>
@@ -74,8 +110,40 @@ export default function Leaderboard() {
     );
   }
 
-  const topThree = leaderboard.slice(0, 3);
-  const remaining = leaderboard.slice(3);
+  if (!currentQuiz) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-xl text-center p-8">
+          <h2 className="text-2xl font-bold text-red-400 mb-4">Quiz Not Found</h2>
+          <p className="mb-4">The requested quiz could not be found.</p>
+          <Link href="/">
+            <Button variant="outline" className="text-white">
+              Back to Home
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (leaderboard.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-white text-center p-8">
+          <h2 className="text-2xl font-bold text-yellow-400 mb-4">No Leaderboard Data Yet</h2>
+          <p className="mb-4">Be the first to complete the quiz and top the leaderboard!</p>
+          <Link href={qrCode ? `/quiz/${qrCode}` : `/quiz/${currentQuiz.id}`}>
+            <Button className="bg-cyan-500 hover:bg-cyan-600">
+              Take the Quiz
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const topThree = leaderboard?.slice(0, 3) || [];
+  const remaining = leaderboard?.slice(3) || [];
 
   return (
     <div className="min-h-screen py-12 px-4">
@@ -83,12 +151,14 @@ export default function Leaderboard() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6">
+          {qrCode && (
             <Link href={`/quiz/${qrCode}`}>
               <Button variant="ghost" className="text-gray-300 hover:text-cyan-400">
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Back to Quiz
               </Button>
             </Link>
+          )}
           </div>
           <h1 className="text-5xl md:text-6xl font-orbitron font-black mb-4">
             <span className="bg-gradient-to-r from-orange-400 to-pink-400 bg-clip-text text-transparent">
@@ -96,7 +166,7 @@ export default function Leaderboard() {
             </span>
           </h1>
           <p className="text-xl text-gray-300">Top performers in the arena</p>
-          <p className="text-lg text-cyan-400 mt-2">{quiz?.title}</p>
+          <p className="text-lg text-cyan-400 mt-2">{currentQuiz?.title}</p>
         </div>
 
         {/* Stats Cards */}
@@ -126,7 +196,7 @@ export default function Leaderboard() {
 
               {/* 1st Place */}
               {topThree[0] && (
-                <div className="text-center order-1 md:order-2">
+                <div className="text-center order-1 md:order-1">
                   <div className="relative mb-4">
                     <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mx-auto flex items-center justify-center text-3xl font-bold animate-float">
                       1
@@ -146,7 +216,7 @@ export default function Leaderboard() {
 
                 {/* 2nd Place */}
               {topThree[1] && (
-                <div className="text-center order-2 md:order-1">
+                <div className="text-center order-2 md:order-2">
                   <div className="relative mb-4">
                     <div className="w-20 h-20 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full mx-auto flex items-center justify-center text-2xl font-bold animate-float" style={{animationDelay: '0.2s'}}>
                       2

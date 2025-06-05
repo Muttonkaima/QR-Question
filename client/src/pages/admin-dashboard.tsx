@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -244,11 +244,25 @@ export default function AdminDashboard() {
                   <h3 className="text-xl font-bold mb-2">{quiz.title}</h3>
                   <p className="text-gray-400 text-sm mb-4">Time Limit: {quiz.timeLimit} minutes</p>
                   <div className="flex space-x-2">
-                    <NeonButton size="sm" onClick={(e) => { e.stopPropagation(); setSelectedQuiz(quiz); setShowQuizCreator(true); }}>
+                    <NeonButton 
+                      size="sm" 
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => { 
+                        e.stopPropagation(); 
+                        setSelectedQuiz(quiz); 
+                        setShowQuizCreator(true); 
+                      }}
+                    >
                       <Eye className="w-4 h-4 mr-1" />
                       Edit
                     </NeonButton>
-                    <NeonButton variant="secondary" size="sm" onClick={(e) => { e.stopPropagation(); generateQRCode(quiz); }}>
+                    <NeonButton 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => { 
+                        e.stopPropagation(); 
+                        generateQRCode(quiz); 
+                      }}
+                    >
                       <QrCode className="w-4 h-4 mr-1" />
                       QR
                     </NeonButton>
@@ -336,7 +350,7 @@ export default function AdminDashboard() {
                             <input
                               type="checkbox"
                               className="text-cyber-blue"
-                              onChange={(e) => {
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 const currentAnswers = questionForm.getValues("correctAnswer") || [];
                                 if (e.target.checked) {
                                   questionForm.setValue("correctAnswer", [...currentAnswers, index]);
@@ -349,7 +363,7 @@ export default function AdminDashboard() {
                               placeholder={`Option ${String.fromCharCode(65 + index)}`}
                               className="flex-1 bg-dark-tertiary border-cyan-500/30 focus:border-cyber-blue"
                               value={questionForm.watch("options")?.[index] || ""}
-                              onChange={(e) => {
+                              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                 const options = questionForm.getValues("options") || [];
                                 options[index] = e.target.value;
                                 questionForm.setValue("options", options);
@@ -447,10 +461,12 @@ export default function AdminDashboard() {
                   <QrCode className="w-5 h-5 mr-2" />
                   GENERATE QR CODE
                 </NeonButton>
-                <NeonButton variant="secondary" onClick={() => setLocation(`/quiz/${selectedQuiz.id}/leaderboard`)}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Leaderboard
-                </NeonButton>
+                <Link href={`/quiz/${selectedQuiz.id}/leaderboard`}>
+                  <NeonButton variant="secondary">
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Leaderboard
+                  </NeonButton>
+                </Link>
               </div>
             )}
           </section>

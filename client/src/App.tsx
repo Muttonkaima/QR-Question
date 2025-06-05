@@ -9,6 +9,7 @@ import QuizRegistration from "@/pages/quiz-registration";
 import QuizInterface from "@/pages/quiz-interface";
 import QuizResults from "@/pages/quiz-results";
 import Leaderboard from "@/pages/leaderboard";
+import AdminDashboard from "@/pages/admin-dashboard";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/quiz/:qrCode/take/:participantId" component={QuizInterface} />
       <Route path="/quiz/:qrCode/results/:participantId" component={QuizResults} />
       <Route path="/quiz/:qrCode/leaderboard" component={Leaderboard} />
+      <Route path="/admin-dashboard" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );
