@@ -42,6 +42,7 @@ export default function AdminPanel() {
   const questionForm = useForm<z.infer<typeof questionFormSchema>>({
     resolver: zodResolver(questionFormSchema),
     defaultValues: {
+      quizId: 0,
       questionText: "",
       questionType: "multiple_choice",
       options: ["", ""],
@@ -68,16 +69,20 @@ export default function AdminPanel() {
 
   const createQuestionMutation = useMutation({
     mutationFn: async (data: z.infer<typeof questionFormSchema>) => {
-      const response = await apiRequest("POST", "/api/questions", {
-        ...data,
-        quizId: currentQuiz.id,
-        orderIndex: questions.length,
-      });
+      const response = await apiRequest("POST", "/api/questions", data);
       return response.json();
     },
     onSuccess: (question) => {
       setQuestions([...questions, question]);
-      questionForm.reset();
+      questionForm.reset({
+        quizId: currentQuiz?.id || 0,
+        questionText: "",
+        questionType: "multiple_choice",
+        options: ["", ""],
+        correctAnswer: "",
+        points: 10,
+        orderIndex: 0,
+      });
       toast({ title: "Success", description: "Question added successfully!" });
     },
     onError: (error: any) => {
@@ -87,6 +92,7 @@ export default function AdminPanel() {
 
   const generateQRMutation = useMutation({
     mutationFn: async () => {
+      if (!currentQuiz) throw new Error("No quiz selected");
       const response = await apiRequest("POST", `/api/quizzes/${currentQuiz.id}/qr-code`);
       return response.json();
     },
@@ -119,7 +125,15 @@ export default function AdminPanel() {
   };
 
   const onSubmitQuestion = (data: z.infer<typeof questionFormSchema>) => {
-    createQuestionMutation.mutate(data);
+    if (!currentQuiz) return;
+    
+    const questionData = {
+      ...data,
+      quizId: currentQuiz.id,
+      orderIndex: questions.length,
+    };
+    
+    createQuestionMutation.mutate(questionData);
   };
 
   const questionType = questionForm.watch("questionType");

@@ -51,7 +51,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const qrCodeData = `quiz-${id}-${Date.now()}`;
-      const qrCodeDataUrl = await QRCode.toDataURL(qrCodeData);
+      const quizUrl = `${req.protocol}://${req.get('host')}/quiz/${qrCodeData}`;
+      const qrCodeDataUrl = await QRCode.toDataURL(quizUrl);
       
       const updatedQuiz = await storage.updateQuizQrCode(id, qrCodeData);
       res.json({ qrCode: qrCodeData, qrCodeDataUrl, quiz: updatedQuiz });
