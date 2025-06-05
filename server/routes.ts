@@ -204,6 +204,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin dashboard stats
+  app.get("/api/admin/stats", async (req, res) => {
+    try {
+      const allQuizzes = await storage.getAllQuizzes();
+      const stats = await Promise.all(allQuizzes.map(async (quiz) => {
+        const quizStats = await storage.getQuizStats(quiz.id);
+        return {
+          quizId: quiz.id,
+          title: quiz.title,
+          ...quizStats,
+          totalQuestions: (await storage.getQuestionsByQuizId(quiz.id)).length,
+          createdAt: quiz.createdAt
+        };
+      }));
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch admin stats", error: (error as Error).message });
+    }
+  });
+
+  // Detailed quiz results for admin
+  app.get("/api/admin/quizzes/:quizId/results", async (req, res) => {
+    try {
+      const quizId = parseInt(req.params.quizId);
+      const quiz = await storage.getQuiz(quizId);
+      if (!quiz) {
+        return res.status(404).json({ message: "Quiz not found" });
+      }
+
+      const questions = await storage.getQuestionsByQuizId(quizId);
+      const submissions = await storage.getSubmissionsByQuiz(quizId);
+      const participants = await Promise.all(
+        submissions.map(s => storage.getParticipant(s.participantId))
+      );
+
+      const results = {
+        quiz,
+        questions,
+        participants: participants.filter(Boolean).map((p, i) => ({
+          ...p,
+          submission: submissions[i],
+          score: submissions[i]?.score || 0
+        })),
+        stats: await storage.getQuizStats(quizId)
+      };
+
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch quiz results", error: (error as Error).message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

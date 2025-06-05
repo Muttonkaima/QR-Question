@@ -46,6 +46,9 @@ export interface IStorage {
     averageScore: number;
     highestScore: number;
   }>;
+  
+  // Get all quizzes
+  getAllQuizzes(): Promise<Quiz[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -243,6 +246,10 @@ export class MemStorage implements IStorage {
       averageScore,
       highestScore,
     };
+  }
+
+  async getAllQuizzes(): Promise<Quiz[]> {
+    return Array.from(this.quizzes.values());
   }
 }
 

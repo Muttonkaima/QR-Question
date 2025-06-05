@@ -272,9 +272,9 @@ export default function AdminPanel() {
                               <SelectItem value="multiple_choice">Multiple Choice</SelectItem>
                               <SelectItem value="true_false">True/False</SelectItem>
                               <SelectItem value="fill_blank">Fill in the Blank</SelectItem>
-                              <SelectItem value="reorder">Reordering (Drag & Drop)</SelectItem>
+                              {/* <SelectItem value="reorder">Reordering (Drag & Drop)</SelectItem>
                               <SelectItem value="sort">Sorting</SelectItem>
-                              <SelectItem value="match">Match the Following</SelectItem>
+                              <SelectItem value="match">Match the Following</SelectItem> */}
                             </SelectContent>
                           </Select>
                           <FormMessage />
@@ -291,8 +291,8 @@ export default function AdminPanel() {
                             <Input 
                               type="number"
                               className="bg-dark-tertiary border-cyan-500/30 text-white"
-                              {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value))}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : null)}
                             />
                           </FormControl>
                           <FormMessage />
@@ -418,7 +418,7 @@ export default function AdminPanel() {
                               question.questionType === 'true_false' ? 'bg-orange-400/20 text-orange-400' :
                               'bg-pink-400/20 text-pink-400'
                             }`}>
-                              {question.questionType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                              {question.questionType.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                             </span>
                           </div>
                           <h4 className="text-lg font-medium mb-2">{question.questionText}</h4>
