@@ -1,0 +1,253 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --background: 10 4% 5%; /* #0A0A0F */
+  --foreground: 0 0% 98%;
+  --muted: 240 4% 16%; /* #1A1A2E */
+  --muted-foreground: 240 5% 65%;
+  --popover: 10 4% 5%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 4% 16%;
+  --card-foreground: 0 0% 98%;
+  --border: 197 100% 50%; /* #00D4FF with 30% opacity */
+  --input: 240 4% 16%;
+  --primary: 197 100% 50%; /* #00D4FF cyber-blue */
+  --primary-foreground: 10 4% 5%;
+  --secondary: 240 4% 16%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 4% 16%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 197 100% 50%;
+  --radius: 0.5rem;
+  --chart-1: 197 100% 50%;
+  --chart-2: 120 100% 50%;
+  --chart-3: 25 100% 60%;
+  --chart-4: 348 83% 47%;
+  --chart-5: 43 74% 66%;
+  
+  /* Gaming theme colors */
+  --cyber-blue: 197 100% 50%; /* #00D4FF */
+  --neon-orange: 16 100% 60%; /* #FF6B35 */
+  --neon-pink: 348 83% 60%; /* #E94560 */
+  --matrix-green: 120 100% 50%; /* #0FFF50 */
+  --dark-primary: 10 4% 5%; /* #0A0A0F */
+  --dark-secondary: 240 10% 14%; /* #1A1A2E */
+  --dark-tertiary: 225 28% 15%; /* #16213E */
+}
+
+.dark {
+  --background: 10 4% 5%;
+  --foreground: 0 0% 98%;
+  --muted: 240 4% 16%;
+  --muted-foreground: 240 5% 65%;
+  --popover: 10 4% 5%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 4% 16%;
+  --card-foreground: 0 0% 98%;
+  --border: 197 100% 50%;
+  --input: 240 4% 16%;
+  --primary: 197 100% 50%;
+  --primary-foreground: 10 4% 5%;
+  --secondary: 240 4% 16%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 240 4% 16%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62% 31%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 240 5% 84%;
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', sans-serif;
+    background-color: hsl(var(--dark-primary));
+  }
+
+  .font-orbitron {
+    font-family: 'Orbitron', monospace;
+  }
+}
+
+@layer components {
+  .gaming-card {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    backdrop-filter: blur(10px);
+    @apply rounded-xl;
+  }
+  
+  .neon-button {
+    background: linear-gradient(45deg, hsl(var(--cyber-blue)), hsl(var(--matrix-green)));
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    transition: all 0.3s ease;
+    @apply text-black font-bold;
+  }
+  
+  .neon-button:hover {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.6), 0 0 40px rgba(15, 255, 80, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  .progress-bar {
+    background: linear-gradient(90deg, hsl(var(--cyber-blue)), hsl(var(--matrix-green)));
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+  
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: hsl(var(--cyber-blue));
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .leaderboard-row:hover {
+    background: linear-gradient(90deg, rgba(0, 212, 255, 0.1), rgba(15, 255, 80, 0.1));
+    transform: translateX(5px);
+  }
+
+  .question-card {
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    position: relative;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(45deg, hsl(var(--cyber-blue)), hsl(var(--matrix-green)), hsl(var(--neon-pink)));
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+  }
+
+  .cyber-blue {
+    color: hsl(var(--cyber-blue));
+  }
+
+  .neon-orange {
+    color: hsl(var(--neon-orange));
+  }
+
+  .neon-pink {
+    color: hsl(var(--neon-pink));
+  }
+
+  .matrix-green {
+    color: hsl(var(--matrix-green));
+  }
+
+  .bg-cyber-blue {
+    background-color: hsl(var(--cyber-blue));
+  }
+
+  .bg-neon-orange {
+    background-color: hsl(var(--neon-orange));
+  }
+
+  .bg-neon-pink {
+    background-color: hsl(var(--neon-pink));
+  }
+
+  .bg-matrix-green {
+    background-color: hsl(var(--matrix-green));
+  }
+
+  .bg-dark-primary {
+    background-color: hsl(var(--dark-primary));
+  }
+
+  .bg-dark-secondary {
+    background-color: hsl(var(--dark-secondary));
+  }
+
+  .bg-dark-tertiary {
+    background-color: hsl(var(--dark-tertiary));
+  }
+
+  .border-cyber-blue {
+    border-color: hsl(var(--cyber-blue));
+  }
+
+  .border-cyber-blue\/30 {
+    border-color: hsl(var(--cyber-blue) / 0.3);
+  }
+
+  .text-cyber-blue {
+    color: hsl(var(--cyber-blue));
+  }
+
+  .text-neon-orange {
+    color: hsl(var(--neon-orange));
+  }
+
+  .text-neon-pink {
+    color: hsl(var(--neon-pink));
+  }
+
+  .text-matrix-green {
+    color: hsl(var(--matrix-green));
+  }
+}
+
+@layer utilities {
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px hsl(var(--cyber-blue)), 0 0 10px hsl(var(--cyber-blue)), 0 0 15px hsl(var(--cyber-blue)); }
+    100% { box-shadow: 0 0 10px hsl(var(--cyber-blue)), 0 0 20px hsl(var(--cyber-blue)), 0 0 30px hsl(var(--cyber-blue)); }
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+  }
+
+  @keyframes slideUp {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0px); opacity: 1; }
+  }
+
+  @keyframes counter {
+    0% { transform: scale(0.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  .animate-counter {
+    animation: counter 0.3s ease-out;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
