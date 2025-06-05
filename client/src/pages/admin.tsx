@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { insertQuizSchema, insertQuestionSchema } from "@shared/schema";
-import { Plus, Gamepad2, Settings, Trophy, Save, Eye, QrCode, Download, Edit, Trash } from "lucide-react";
+import { Plus, Gamepad2, Settings, Trophy, Save, Eye, QrCode, Download, Edit, Trash, Check } from "lucide-react";
 import { Link } from "wouter";
 import GamingCard from "@/components/ui/gaming-card";
 
@@ -325,71 +325,107 @@ export default function AdminPanel() {
 
                   {questionType === "multiple_choice" && (
                     <div className="space-y-4">
-                      <FormLabel className="text-gray-300">Options</FormLabel>
-                      {questionForm.watch("options")?.map((_, index) => (
-                        <div key={index} className="flex items-center space-x-4">
-                          <FormField
-                            control={questionForm.control}
-                            name={`options.${index}`}
-                            render={({ field }) => (
-                              <FormItem className="flex-1">
-                                <FormControl>
-                                  <Input 
-                                    placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                                    className="bg-dark-tertiary border-cyan-500/30 text-white"
-                                    {...field} 
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              const options = questionForm.getValues("options") || [];
-                              options.splice(index, 1);
-                              questionForm.setValue("options", options);
-                            }}
-                          >
-                            <Trash className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => {
-                          const options = questionForm.getValues("options") || [];
-                          questionForm.setValue("options", [...options, ""]);
-                        }}
-                        className="text-green-400 border-green-400/30 hover:bg-green-400/10"
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Option
-                      </Button>
+                      <div className="space-y-2">
+                        <FormLabel className="text-gray-300">Options</FormLabel>
+                        {questionForm.watch("options")?.map((_, index) => (
+                          <div key={index} className="flex items-center space-x-4">
+                            <FormField
+                              control={questionForm.control}
+                              name={`options.${index}`}
+                              render={({ field }) => (
+                                <FormItem className="flex-1 relative">
+                                  <FormControl>
+                                    <Input 
+                                      placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                                      className={`bg-dark-tertiary border-cyan-500/30 text-white ${questionForm.watch("correctAnswer") === questionForm.watch(`options.${index}`) ? 'border-green-500' : ''}`}
+                                      {...field}
+                                      onFocus={() => {
+                                        if (field.value) {
+                                          questionForm.setValue("correctAnswer", field.value);
+                                        }
+                                      }}
+                                    />
+                                  </FormControl>
+                                  {questionForm.watch("correctAnswer") === field.value && (
+                                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                                      ✓
+                                    </div>
+                                  )}
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const options = questionForm.getValues("options") || [];
+                                options.splice(index, 1);
+                                questionForm.setValue("options", options);
+                              }}
+                            >
+                              <Trash className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            const options = questionForm.getValues("options") || [];
+                            questionForm.setValue("options", [...options, ""]);
+                          }}
+                          className="text-green-400 border-green-400/30 hover:bg-green-400/10"
+                        >
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add Option
+                        </Button>
+                      </div>
+                      <input type="hidden" {...questionForm.register("correctAnswer")} />
                     </div>
                   )}
 
-                  <FormField
-                    control={questionForm.control}
-                    name="correctAnswer"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-gray-300">Correct Answer</FormLabel>
-                        <FormControl>
-                          <Input 
-                            placeholder="Enter the correct answer..."
-                            className="bg-dark-tertiary border-cyan-500/30 text-white"
-                            {...field} 
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {questionType === "true_false" && (
+                    <div className="space-y-4">
+                      <FormLabel className="text-gray-300 block">Correct Answer</FormLabel>
+                      <div className="flex space-x-4">
+                        {[true, false].map((value) => (
+                          <Button
+                            key={String(value)}
+                            type="button"
+                            variant={questionForm.watch("correctAnswer") === String(value) ? "default" : "outline"}
+                            className={`flex-1 ${questionForm.watch("correctAnswer") === String(value) 
+                              ? 'bg-green-500 hover:bg-green-600' 
+                              : 'bg-dark-tertiary border-cyan-500/30 hover:bg-dark-secondary'}`}
+                            onClick={() => questionForm.setValue("correctAnswer", String(value))}
+                          >
+                            {value ? 'True' : 'False'}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {questionType === "fill_blank" && (
+                    <FormField
+                      control={questionForm.control}
+                      name="correctAnswer"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-gray-300">Correct Answer</FormLabel>
+                          <FormControl>
+                            <Input 
+                              placeholder="Enter the correct answer..."
+                              className="bg-dark-tertiary border-cyan-500/30 text-white"
+                              {...field} 
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
 
                   <div className="flex space-x-4">
                     <Button 
@@ -426,7 +462,7 @@ export default function AdminPanel() {
                             </span>
                           </div>
                           <h4 className="text-lg font-medium mb-2">{question.questionText}</h4>
-                          {question.options && (
+                          {question.questionType === 'multiple_choice' && question.options && (
                             <div className="text-sm text-gray-400 space-y-1">
                               {question.options.map((option: string, optIndex: number) => (
                                 <div key={optIndex} className={option === question.correctAnswer ? 'text-green-400' : ''}>
@@ -435,9 +471,20 @@ export default function AdminPanel() {
                               ))}
                             </div>
                           )}
-                          {!question.options && (
+                          {question.questionType === 'true_false' && (
                             <div className="text-sm text-gray-400">
-                              <div className="text-green-400">Answer: {question.correctAnswer} ✓</div>
+                              <div className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-900/20 text-green-400">
+                                {question.correctAnswer === 'true' ? 'True' : 'False'}
+                                <Check className="ml-1 h-3 w-3" />
+                              </div>
+                            </div>
+                          )}
+                          {question.questionType === 'fill_blank' && (
+                            <div className="text-sm text-gray-400">
+                              <div className="inline-flex items-center px-3 py-1 rounded-md bg-blue-900/20 text-blue-400">
+                                <span className="font-mono">"{question.correctAnswer}"</span>
+                                <Check className="ml-1 h-3 w-3" />
+                              </div>
                             </div>
                           )}
                         </div>
