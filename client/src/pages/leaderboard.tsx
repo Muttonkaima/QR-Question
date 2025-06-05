@@ -122,26 +122,11 @@ export default function Leaderboard() {
           <GamingCard className="p-8 mb-8">
             <h2 className="text-2xl font-orbitron font-bold mb-8 text-center text-cyan-400">Hall of Champions</h2>
             <div className="grid md:grid-cols-3 gap-6">
-              {/* 2nd Place */}
-              {topThree[1] && (
-                <div className="text-center order-1 md:order-1">
-                  <div className="relative mb-4">
-                    <div className="w-20 h-20 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full mx-auto flex items-center justify-center text-2xl font-bold animate-float" style={{animationDelay: '0.2s'}}>
-                      2
-                    </div>
-                    <div className="absolute -top-2 -right-2 text-2xl">
-                      <Medal className="h-8 w-8 text-gray-400" />
-                    </div>
-                  </div>
-                  <h3 className="text-xl font-bold mb-1">{topThree[1].name}</h3>
-                  <div className="text-gray-400 text-sm mb-2 truncate">{topThree[1].email}</div>
-                  <div className="text-2xl font-bold text-gray-400">{topThree[1].score}</div>
-                </div>
-              )}
+             
 
               {/* 1st Place */}
               {topThree[0] && (
-                <div className="text-center order-2 md:order-2">
+                <div className="text-center order-1 md:order-2">
                   <div className="relative mb-4">
                     <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full mx-auto flex items-center justify-center text-3xl font-bold animate-float">
                       1
@@ -156,6 +141,23 @@ export default function Leaderboard() {
                   {topThree[0].score === stats?.highestScore && (
                     <div className="text-sm text-green-400 mt-1">Perfect Score!</div>
                   )}
+                </div>
+              )}
+
+                {/* 2nd Place */}
+              {topThree[1] && (
+                <div className="text-center order-2 md:order-1">
+                  <div className="relative mb-4">
+                    <div className="w-20 h-20 bg-gradient-to-r from-gray-400 to-gray-600 rounded-full mx-auto flex items-center justify-center text-2xl font-bold animate-float" style={{animationDelay: '0.2s'}}>
+                      2
+                    </div>
+                    <div className="absolute -top-2 -right-2 text-2xl">
+                      <Medal className="h-8 w-8 text-gray-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-1">{topThree[1].name}</h3>
+                  <div className="text-gray-400 text-sm mb-2 truncate">{topThree[1].email}</div>
+                  <div className="text-2xl font-bold text-gray-400">{topThree[1].score}</div>
                 </div>
               )}
 
@@ -175,6 +177,8 @@ export default function Leaderboard() {
                   <div className="text-2xl font-bold text-yellow-600">{topThree[2].score}</div>
                 </div>
               )}
+
+             
             </div>
           </GamingCard>
         )}
