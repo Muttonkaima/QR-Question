@@ -76,6 +76,7 @@ export class MemStorage implements IStorage {
       id,
       qrCode: null,
       createdAt: new Date(),
+      isActive: insertQuiz.isActive ?? true,
     };
     this.quizzes.set(id, quiz);
     return quiz;
@@ -112,6 +113,8 @@ export class MemStorage implements IStorage {
     const question: Question = {
       ...insertQuestion,
       id,
+      options: insertQuestion.options ?? null,
+      points: insertQuestion.points ?? 10,
     };
     this.questions.set(id, question);
     return question;

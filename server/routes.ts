@@ -12,7 +12,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const quiz = await storage.createQuiz(quizData);
       res.json(quiz);
     } catch (error) {
-      res.status(400).json({ message: "Invalid quiz data", error: error.message });
+      res.status(400).json({ message: "Invalid quiz data", error: (error as Error).message });
     }
   });
 
@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(quiz);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch quiz", error: error.message });
+      res.status(500).json({ message: "Failed to fetch quiz", error: (error as Error).message });
     }
   });
 
@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(quiz);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch quiz", error: error.message });
+      res.status(500).json({ message: "Failed to fetch quiz", error: (error as Error).message });
     }
   });
 
@@ -56,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedQuiz = await storage.updateQuizQrCode(id, qrCodeData);
       res.json({ qrCode: qrCodeData, qrCodeDataUrl, quiz: updatedQuiz });
     } catch (error) {
-      res.status(500).json({ message: "Failed to generate QR code", error: error.message });
+      res.status(500).json({ message: "Failed to generate QR code", error: (error as Error).message });
     }
   });
 
@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const question = await storage.createQuestion(questionData);
       res.json(question);
     } catch (error) {
-      res.status(400).json({ message: "Invalid question data", error: error.message });
+      res.status(400).json({ message: "Invalid question data", error: (error as Error).message });
     }
   });
 
@@ -77,7 +77,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const questions = await storage.getQuestionsByQuizId(quizId);
       res.json(questions);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch questions", error: error.message });
+      res.status(500).json({ message: "Failed to fetch questions", error: (error as Error).message });
     }
   });
 
@@ -90,7 +90,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Question deleted successfully" });
     } catch (error) {
-      res.status(500).json({ message: "Failed to delete question", error: error.message });
+      res.status(500).json({ message: "Failed to delete question", error: (error as Error).message });
     }
   });
 
@@ -104,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(question);
     } catch (error) {
-      res.status(400).json({ message: "Invalid question data", error: error.message });
+      res.status(400).json({ message: "Invalid question data", error: (error as Error).message });
     }
   });
 
@@ -126,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const participant = await storage.createParticipant(participantData);
       res.json(participant);
     } catch (error) {
-      res.status(400).json({ message: "Invalid participant data", error: error.message });
+      res.status(400).json({ message: "Invalid participant data", error: (error as Error).message });
     }
   });
 
@@ -144,7 +144,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const submission = await storage.createSubmission(submissionData);
       res.json(submission);
     } catch (error) {
-      res.status(400).json({ message: "Invalid submission data", error: error.message });
+      res.status(400).json({ message: "Invalid submission data", error: (error as Error).message });
     }
   });
 
@@ -157,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(submission);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch submission", error: error.message });
+      res.status(500).json({ message: "Failed to fetch submission", error: (error as Error).message });
     }
   });
 
@@ -168,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const leaderboard = await storage.getLeaderboard(quizId);
       res.json(leaderboard);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch leaderboard", error: error.message });
+      res.status(500).json({ message: "Failed to fetch leaderboard", error: (error as Error).message });
     }
   });
 
@@ -178,7 +178,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getQuizStats(quizId);
       res.json(stats);
     } catch (error) {
-      res.status(500).json({ message: "Failed to fetch quiz stats", error: error.message });
+      res.status(500).json({ message: "Failed to fetch quiz stats", error: (error as Error).message });
     }
   });
 
@@ -199,7 +199,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader('Content-Disposition', `attachment; filename="quiz-${quizId}-results.csv"`);
       res.send(csv);
     } catch (error) {
-      res.status(500).json({ message: "Failed to export results", error: error.message });
+      res.status(500).json({ message: "Failed to export results", error: (error as Error).message });
     }
   });
 
