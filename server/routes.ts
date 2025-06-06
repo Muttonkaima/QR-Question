@@ -1,7 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertQuizSchema, insertQuestionSchema, insertParticipantSchema, insertSubmissionSchema } from "@shared/schema";
+import { 
+  insertQuizSchema, 
+  insertQuestionSchema, 
+  insertParticipantSchema, 
+  insertSubmissionSchema,
+  createSubmissionSchema,
+  updateSubmissionSchema 
+} from "@shared/schema";
 import QRCode from "qrcode";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -133,19 +140,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Submission routes
   app.post("/api/submissions", async (req, res) => {
+    console.log('POST /api/submissions - Request body:', req.body);
     try {
-      const submissionData = insertSubmissionSchema.parse(req.body);
+      const submissionData = createSubmissionSchema.parse(req.body);
+      console.log('Parsed submission data:', submissionData);
       
-      // Check if participant already submitted
       const existingSubmission = await storage.getSubmissionByParticipant(submissionData.participantId);
+      console.log('Existing submission:', existingSubmission);
+      
       if (existingSubmission) {
-        return res.status(400).json({ message: "Participant has already submitted this quiz" });
+        console.log('Participant already has a submission, will update instead');
+        // Instead of erroring, update the existing submission
+        const updatedData = {
+          ...submissionData,
+          id: existingSubmission.id,
+        };
+        const result = await storage.updateSubmissionFinal({
+          ...existingSubmission,
+          ...updatedData,
+          submittedAt: new Date()
+        });
+        return res.json(result);
       }
-
+      
+      console.log('Creating new submission');
       const submission = await storage.createSubmission(submissionData);
+      console.log('Created submission:', submission);
       res.json(submission);
     } catch (error) {
-      res.status(400).json({ message: "Invalid submission data", error: (error as Error).message });
+      console.error('Error in POST /api/submissions:', error);
+      res.status(400).json({ 
+        message: "Invalid submission data", 
+        error: (error as Error).message,
+        stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
+      });
+    }
+  });
+  
+  app.put("/api/submissions", async (req, res) => {
+    console.log('PUT /api/submissions - Request body:', req.body);
+    try {
+      const submissionData = updateSubmissionSchema.parse(req.body);
+      console.log('Parsed update data:', submissionData);
+      
+      const existingSubmission = await storage.getSubmissionByParticipant(submissionData.participantId);
+      console.log('Existing submission for update:', existingSubmission);
+      
+      if (!existingSubmission) {
+        console.log('No existing submission found, creating new one');
+        // If no existing submission, create a new one
+        const submission = await storage.createSubmission(submissionData);
+        return res.json(submission);
+      }
+      
+      // Update the existing submission with new data
+      const updatedData = {
+        ...submissionData,
+        id: existingSubmission.id,
+      };
+      
+      console.log('Updating submission with:', updatedData);
+      const result = await storage.updateSubmissionFinal({
+        ...existingSubmission,
+        ...updatedData,
+        submittedAt: new Date()
+      });
+      console.log('Updated submission result:', result);
+      res.json(result);
+    } catch (error) {
+      console.error('Error in PUT /api/submissions:', error);
+      res.status(400).json({ 
+        message: "Failed to update submission", 
+        error: (error as Error).message,
+        stack: process.env.NODE_ENV === 'development' ? (error as Error).stack : undefined
+      });
     }
   });
 
@@ -180,6 +248,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch quiz stats", error: (error as Error).message });
+    }
+  });
+
+  // Submit answer to a single question
+  app.post("/api/submit-answer", async (req, res) => {
+    try {
+      const { participantId, quizId, questionId, isCorrect, points } = req.body;
+      
+      if (!participantId || !quizId || questionId === undefined || isCorrect === undefined) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      const submission = await storage.updateSubmission(
+        parseInt(participantId),
+        parseInt(quizId),
+        parseInt(questionId),
+        isCorrect,
+        points || 10 // Default to 10 points if not specified
+      );
+      
+      res.json({
+        success: true,
+        score: submission.score,
+        updatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: "Failed to submit answer", 
+        error: (error as Error).message 
+      });
     }
   });
 

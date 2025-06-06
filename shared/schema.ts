@@ -57,9 +57,39 @@ export const insertParticipantSchema = createInsertSchema(participants).omit({
   createdAt: true,
 });
 
-export const insertSubmissionSchema = createInsertSchema(submissions).omit({
-  id: true,
-  submittedAt: true,
+// Base submission fields
+export const submissionFields = {
+  participantId: z.number(),
+  quizId: z.number(),
+  answers: z.string(),
+  score: z.number(),
+  totalQuestions: z.number(),
+  completionTime: z.number(),
+} as const;
+
+// For creating new submissions (ID is auto-generated)
+export const createSubmissionSchema = z.object({
+  ...submissionFields,
+});
+
+// For updating existing submissions
+export const updateSubmissionSchema = z.object({
+  ...submissionFields,
+  id: z.number(),
+});
+
+// For general submission operations
+export const insertSubmissionSchema = z.object({
+  ...submissionFields,
+  id: z.number().optional(),
+  submittedAt: z.date().optional(),
+});
+
+// Type for submission with all fields
+export const submissionSchema = z.object({
+  id: z.number(),
+  ...submissionFields,
+  submittedAt: z.date().optional(),
 });
 
 export type Quiz = typeof quizzes.$inferSelect;

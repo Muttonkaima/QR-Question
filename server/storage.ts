@@ -36,8 +36,11 @@ export interface IStorage {
   
   // Submission management
   createSubmission(submission: InsertSubmission): Promise<Submission>;
+  updateSubmission(participantId: number, quizId: number, questionId: number, isCorrect: boolean, points: number): Promise<Submission>;
+  updateSubmissionFinal(submission: Submission): Promise<Submission>;
   getSubmissionsByQuiz(quizId: number): Promise<Submission[]>;
   getSubmissionByParticipant(participantId: number): Promise<Submission | undefined>;
+  getOrCreateSubmission(participantId: number, quizId: number, totalQuestions: number): Promise<Submission>;
   
   // Leaderboard
   getLeaderboard(quizId: number): Promise<LeaderboardEntry[]>;
@@ -169,10 +172,71 @@ export class MemStorage implements IStorage {
     const submission: Submission = {
       ...insertSubmission,
       id,
+      answers: '{}', // Initialize as empty object for partial submissions
+      score: 0, // Start with 0 score
       submittedAt: new Date(),
     };
     this.submissions.set(id, submission);
     return submission;
+  }
+
+  async getOrCreateSubmission(participantId: number, quizId: number, totalQuestions: number): Promise<Submission> {
+    // Try to find existing submission
+    const existing = Array.from(this.submissions.values())
+      .find(s => s.participantId === participantId && s.quizId === quizId);
+    
+    if (existing) return existing;
+
+    // Create new submission if not exists
+    return this.createSubmission({
+      participantId,
+      quizId,
+      answers: '{}',
+      score: 0,
+      totalQuestions,
+      completionTime: 0,
+    });
+  }
+
+  async updateSubmission(participantId: number, quizId: number, questionId: number, isCorrect: boolean, points: number): Promise<Submission> {
+    const submission = await this.getOrCreateSubmission(participantId, quizId, 0);
+    
+    // Parse existing answers
+    const answers = JSON.parse(submission.answers || '{}');
+    
+    // Update the answer for this question
+    answers[questionId] = isCorrect;
+    
+    // Calculate new score
+    let score = 0;
+    Object.values(answers).forEach((correct: any) => {
+      if (correct) score += points; // Add points for each correct answer
+    });
+    
+    // Update submission
+    const updatedSubmission: Submission = {
+      ...submission,
+      answers: JSON.stringify(answers),
+      score,
+    };
+    
+    this.submissions.set(submission.id, updatedSubmission);
+    return updatedSubmission;
+  }
+
+  async updateSubmissionFinal(updatedSubmission: Submission): Promise<Submission> {
+    const existing = this.submissions.get(updatedSubmission.id);
+    if (!existing) {
+      throw new Error('Submission not found');
+    }
+    
+    const finalSubmission: Submission = {
+      ...updatedSubmission,
+      submittedAt: new Date(),
+    };
+    
+    this.submissions.set(updatedSubmission.id, finalSubmission);
+    return finalSubmission;
   }
 
   async getSubmissionsByQuiz(quizId: number): Promise<Submission[]> {

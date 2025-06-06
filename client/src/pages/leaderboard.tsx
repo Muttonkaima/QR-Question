@@ -44,7 +44,7 @@ export default function Leaderboard() {
   const { data: leaderboard = [], isLoading: leaderboardLoading } = useQuery<LeaderboardEntry[]>({
     queryKey: currentQuiz ? [`/api/quizzes/${currentQuiz.id}/leaderboard`] : [],
     enabled: !!currentQuiz?.id,
-    refetchInterval: 5000, // Real-time updates every 5 seconds
+    refetchInterval: 1000, // Real-time updates every 5 seconds
   });
 
   interface QuizStats {
@@ -56,7 +56,7 @@ export default function Leaderboard() {
   const { data: stats } = useQuery<QuizStats>({
     queryKey: currentQuiz ? [`/api/quizzes/${currentQuiz.id}/stats`] : [],
     enabled: !!currentQuiz?.id,
-    refetchInterval: 5000,
+    refetchInterval: 1000,
   });
 
   // Update last update time
